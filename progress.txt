@@ -88,3 +88,14 @@ All 14 tests passing.
 
 ### Linting
 go vet and gofmt pass with no issues.
+
+## 2026-01-16: Verify GET /tasks endpoint
+
+### Completed
+- Verified GET /tasks endpoint implementation in main.go (listTasks method, lines 137-140)
+- Endpoint returns all tasks as JSON array with Content-Type: application/json
+- Returns empty array [] when no tasks exist
+- Confirmed existing tests cover this endpoint (TestServerListTasks)
+- All 14 tests passing
+- Linting passes (go vet, gofmt)
+- Marked task as complete in PRD.md
