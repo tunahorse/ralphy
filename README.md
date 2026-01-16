@@ -2,7 +2,7 @@
 
 ![Ralphy](assets/ralphy.jpeg)
 
-An autonomous AI coding loop that runs AI assistants (Claude Code, OpenCode, or Cursor) to work through tasks until everything is complete.
+An autonomous AI coding loop that runs AI assistants (Claude Code, OpenCode, Codex, or Cursor) to work through tasks until everything is complete.
 
 ## What It Does
 
@@ -35,10 +35,26 @@ EOF
 
 That's it. Ralphy will work through each task autonomously.
 
+## Running the Bun Server
+
+This project includes a simple Bun HTTP server. To run it:
+
+```bash
+# Install dependencies
+bun install
+
+# Start the server
+bun run start
+```
+
+The server runs on port 3000 with the following endpoints:
+- `GET /` - Returns "Hello from Bun"
+- `GET /health` - Returns `{"status":"ok"}`
+
 ## Requirements
 
 **Required:**
-- One of: [Claude Code CLI](https://github.com/anthropics/claude-code), [OpenCode CLI](https://opencode.ai/docs/), or [Cursor](https://cursor.com) (with `agent` in PATH)
+- One of: [Claude Code CLI](https://github.com/anthropics/claude-code), [OpenCode CLI](https://opencode.ai/docs/), Codex CLI, or [Cursor](https://cursor.com) (with `agent` in PATH)
 - `jq` (for JSON parsing)
 
 **Optional:**
@@ -133,6 +149,8 @@ tasks:
     parallel_group: 2  # Runs after group 1 completes
 ```
 
+Tasks without `parallel_group` default to group `0` and run before higher-numbered groups.
+
 ## Branch Workflow
 
 Create a separate branch for each task:
@@ -152,6 +170,7 @@ Example: "Add user authentication" becomes `ralphy/add-user-authentication`
 
 ```bash
 ./ralphy.sh              # Claude Code (default)
+./ralphy.sh --codex      # Codex CLI
 ./ralphy.sh --opencode   # OpenCode
 ./ralphy.sh --cursor     # Cursor agent
 ```
@@ -162,6 +181,7 @@ Example: "Add user authentication" becomes `ralphy/add-user-authentication`
 |--------|-------------|------------------|--------|
 | Claude Code | `claude` | `--dangerously-skip-permissions` | Token usage + cost estimate |
 | OpenCode | `opencode` | `OPENCODE_PERMISSION='{"*":"allow"}'` | Token usage + actual cost |
+| Codex | `codex` | N/A | Token usage (if provided) |
 | Cursor | `agent` | `--force` | API duration (no token counts) |
 
 **Note:** Cursor's CLI doesn't expose token usage, so Ralphy tracks total API duration instead.
@@ -172,6 +192,7 @@ Example: "Add user authentication" becomes `ralphy/add-user-authentication`
 | Flag | Description |
 |------|-------------|
 | `--claude` | Use Claude Code (default) |
+| `--codex` | Use Codex CLI |
 | `--opencode` | Use OpenCode |
 | `--cursor`, `--agent` | Use Cursor agent |
 
@@ -225,6 +246,9 @@ Example: "Add user authentication" becomes `ralphy/add-user-authentication`
 # Basic usage
 ./ralphy.sh
 
+# Basic usage with Codex
+./ralphy.sh --codex
+
 # Fast mode with OpenCode
 ./ralphy.sh --opencode --fast
 
@@ -270,6 +294,7 @@ At completion, Ralphy shows different metrics depending on the AI engine:
 |--------|---------------|
 | Claude Code | Input/output tokens, estimated cost |
 | OpenCode | Input/output tokens, actual cost |
+| Codex | Input/output tokens (if provided) |
 | Cursor | Total API duration (tokens not available) |
 
 All engines show branches created (if using `--branch-per-task`).

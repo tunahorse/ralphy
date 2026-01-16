@@ -29,3 +29,11 @@ Status: COMPLETE
 - Server can now be started with `bun run start`
 - All tests pass (3/3)
 - TypeScript type checking passes
+
+Task: Document how to run the server in README
+Status: COMPLETE
+- Added "Running the Bun Server" section to README.md
+- Documents `bun install` and `bun run start` commands
+- Lists available endpoints (GET / and GET /health)
+- All tests pass (3/3)
+- TypeScript type checking passes
