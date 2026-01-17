@@ -2068,7 +2068,7 @@ main() {
 
   # Sequential main loop
   while true; do
-    iteration=$((iteration + 1))
+    ((iteration++))
     local result_code=0
     run_single_task "" "$iteration" || result_code=$?
     
