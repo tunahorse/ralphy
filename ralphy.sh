@@ -509,35 +509,35 @@ run_brownfield_task() {
 
   log_info "Running with $AI_ENGINE..."
 
-  # Run the AI engine
+  # Run the AI engine (tee to show output while saving for parsing)
   case "$AI_ENGINE" in
     claude)
       claude --dangerously-skip-permissions \
-        -p "$prompt" > "$output_file" 2>&1
+        -p "$prompt" 2>&1 | tee "$output_file"
       ;;
     opencode)
       opencode --output-format stream-json \
         --approval-mode full-auto \
-        "$prompt" > "$output_file" 2>&1
+        "$prompt" 2>&1 | tee "$output_file"
       ;;
     cursor)
       agent --dangerously-skip-permissions \
-        -p "$prompt" > "$output_file" 2>&1
+        -p "$prompt" 2>&1 | tee "$output_file"
       ;;
     qwen)
       qwen --output-format stream-json \
         --approval-mode yolo \
-        -p "$prompt" > "$output_file" 2>&1
+        -p "$prompt" 2>&1 | tee "$output_file"
       ;;
     droid)
       droid exec --output-format stream-json \
         --auto medium \
-        "$prompt" > "$output_file" 2>&1
+        "$prompt" 2>&1 | tee "$output_file"
       ;;
     codex)
       codex exec --full-auto \
         --json \
-        "$prompt" > "$output_file" 2>&1
+        "$prompt" 2>&1 | tee "$output_file"
       ;;
   esac
 
