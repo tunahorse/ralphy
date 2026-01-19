@@ -1,12 +1,14 @@
 # Ralphy
 
+[![npm version](https://img.shields.io/npm/v/ralphy-cli.svg)](https://www.npmjs.com/package/ralphy-cli)
+
 ![Ralphy](assets/ralphy.jpeg)
 
 Autonomous AI coding loop. Runs AI agents on tasks until done.
 
 ## Install
 
-**Option A: npm** (recommended)
+**Option A: [npm](https://www.npmjs.com/package/ralphy-cli)** (recommended)
 ```bash
 npm install -g ralphy-cli
 
