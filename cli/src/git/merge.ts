@@ -147,17 +147,47 @@ export async function deleteLocalBranch(
 
 /**
  * Complete a merge after conflicts have been resolved
+ * Only stages and commits if there are no remaining conflicts
  */
-export async function completeMerge(workDir: string): Promise<boolean> {
+export async function completeMerge(workDir: string, resolvedFiles?: string[]): Promise<boolean> {
 	const git: SimpleGit = simpleGit(workDir);
 	try {
-		// Stage all changes and commit
-		await git.add(".");
-		await git.commit("Resolve merge conflicts", ["--no-edit"]);
+		// Verify no conflicts remain
+		const remainingConflicts = await getConflictedFiles(workDir);
+		if (remainingConflicts.length > 0) {
+			return false;
+		}
+
+		// Only stage the specific resolved files if provided, otherwise stage all
+		if (resolvedFiles && resolvedFiles.length > 0) {
+			for (const file of resolvedFiles) {
+				await git.add(file);
+			}
+		} else {
+			// Check if we're in a merge state and just need to commit
+			const status = await git.status();
+			if (status.staged.length === 0) {
+				// Nothing staged, stage all modified files
+				await git.add(".");
+			}
+		}
+
+		// Use --no-edit to preserve Git's prepared merge message
+		await git.commit([], ["--no-edit"]);
 		return true;
 	} catch {
 		return false;
 	}
+}
+
+/**
+ * Check if a merge is currently in progress
+ */
+export async function isMergeInProgress(workDir: string): Promise<boolean> {
+	const git: SimpleGit = simpleGit(workDir);
+	const status = await git.status();
+	// If we have conflicted files or are in a merge state
+	return status.conflicted.length > 0 || status.current?.includes("MERGING") || false;
 }
 
 /**

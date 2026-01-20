@@ -1,5 +1,5 @@
 import type { AIEngine } from "../engines/types.ts";
-import { completeMerge } from "../git/merge.ts";
+import { completeMerge, getConflictedFiles } from "../git/merge.ts";
 import { logDebug, logInfo, logError } from "../ui/logger.ts";
 
 /**
@@ -51,15 +51,24 @@ export async function resolveConflictsWithAI(
 		const result = await engine.execute(prompt, workDir, engineOptions);
 
 		if (result.success) {
-			// Verify the merge was completed by the AI
-			const completed = await completeMerge(workDir);
+			// Check if AI successfully resolved all conflicts
+			const remainingConflicts = await getConflictedFiles(workDir);
+			if (remainingConflicts.length > 0) {
+				logError(`AI did not resolve all conflicts. Remaining: ${remainingConflicts.join(", ")}`);
+				return false;
+			}
+
+			// Try to complete the merge (AI may have staged but not committed)
+			const completed = await completeMerge(workDir, conflictedFiles);
 			if (completed) {
 				logInfo("AI successfully resolved merge conflicts");
 				return true;
 			}
-			// Try to complete it ourselves if AI staged but didn't commit
-			logDebug("AI may have resolved files but didn't complete merge, attempting to finalize...");
-			return await completeMerge(workDir);
+
+			// If completeMerge returned false but no conflicts remain,
+			// the AI likely already committed
+			logDebug("Merge appears to be already completed by AI");
+			return true;
 		}
 
 		logError(`AI conflict resolution failed: ${result.error || "Unknown error"}`);

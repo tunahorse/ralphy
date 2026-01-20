@@ -18,7 +18,7 @@ import {
 	deleteLocalBranch,
 	createIntegrationBranch,
 } from "../git/merge.ts";
-import { getCurrentBranch } from "../git/branch.ts";
+import { getCurrentBranch, returnToBaseBranch } from "../git/branch.ts";
 import { buildParallelPrompt } from "./prompt.ts";
 import { isRetryableError, sleep, withRetry } from "./retry.ts";
 import { resolveConflictsWithAI } from "./conflict-resolution.ts";
@@ -148,8 +148,11 @@ export async function runParallel(
 	const worktreeBase = getWorktreeBase(workDir);
 	logDebug(`Worktree base: ${worktreeBase}`);
 
+	// Save starting branch to restore after merge phase
+	const startingBranch = await getCurrentBranch(workDir);
+
 	// Save original base branch for merge phase
-	const originalBaseBranch = baseBranch || (await getCurrentBranch(workDir));
+	const originalBaseBranch = baseBranch || startingBranch;
 
 	// Track completed branches for merge phase
 	const completedBranches: string[] = [];
@@ -275,6 +278,13 @@ export async function runParallel(
 			workDir,
 			modelOverride
 		);
+
+		// Restore starting branch if we're not already on it
+		const currentBranch = await getCurrentBranch(workDir);
+		if (currentBranch !== startingBranch) {
+			logDebug(`Restoring starting branch: ${startingBranch}`);
+			await returnToBaseBranch(startingBranch, workDir);
+		}
 	}
 
 	return result;
